@@ -16,3 +16,14 @@ export function hasClass(el, className) {
 
   return reg.test(el.className)
 }
+
+// 获取dom的data
+export function getData(el, name, val) {
+  const prefix = 'data-';
+  const newName = prefix + name;
+  if (val) {
+    return el.setAttribute(newName, val)
+  } else {
+    return el.getAttribute(newName)
+  }
+}
