@@ -6,7 +6,8 @@
           <Slider>
             <div v-for="item in recommends">
               <a :href="item.linkUrl">
-                <img @load="loadImage" :src="item.picUrl">
+                <!--fastclick 与better-scroll点击冲突，添加needsclick这个类，fastclick允许他点击-->
+                <img class="needsclick" @load="loadImage" :src="item.picUrl">
               </a>
             </div>
           </Slider>
@@ -16,7 +17,7 @@
           <ul>
             <li v-for="item in discList" class="item">
               <div class="icon">
-                <img width="60" height="60" :src="item.imgurl">
+                <img width="60" height="60" v-lazy="item.imgurl">
               </div>
               <div class="text">
                 <h2 class="name" v-for="item2 in item" v-if="item2.name" v-html="item2.name"></h2>
@@ -26,11 +27,15 @@
           </ul>
         </div>
       </div>
+      <div class="loading-container" v-show="!discList.length">
+        <Loading></Loading>
+      </div>
     </Scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import Loading from 'base/loading/loading'
   import Scroll from 'base/scroll/scroll'
   import Slider from 'base/slider/slider'
   import {getRecommend} from 'api/recommend'
@@ -71,7 +76,8 @@
     },
     components: {
       Slider,
-      Scroll
+      Scroll,
+      Loading
     }
   }
 </script>
