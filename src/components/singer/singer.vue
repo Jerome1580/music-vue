@@ -1,6 +1,7 @@
 <template>
   <div class="singer">
-    <ListView :data="singers"></ListView>
+    <ListView @select="selectSinger" :data="singers"></ListView>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -23,6 +24,12 @@
       this._getSingerList()
     },
     methods: {
+      // 编程式导航
+      selectSinger(singer){
+        this.$router.push({
+          path: `/singer/${singer.id}`
+        })
+      },
       _getSingerList(){
         getSingerList().then((res) => {
           if (res.code === ERR_OK) {
