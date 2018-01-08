@@ -29,16 +29,24 @@
         </li>
       </ul>
     </div>
+    <!--固定标题-->
+    <div class="list-fixed" v-show="fixedTitle" ref="fixed">
+      <h1 class="fixed-title">{{ fixedTitle }}</h1>
+    </div>
+    <div v-show="!data.length" class="loading-container"></div>
   </Scroll>
 
 </template>
 
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll'
+  import Loading from 'base/loading/loading'
   import {getData} from 'common/js/dom'
 
   // 每个右侧的高度
   const ANCHOR_HEIGHT = 18
+  const TITLE_HEIGHT = 30
+
   export default {
     created(){
       this.touch = {}
@@ -49,7 +57,8 @@
     data(){
       return {
         scrollY: -1,
-        currentIndex: 0
+        currentIndex: 0,
+        diff: 0
       }
     },
     props: {
@@ -63,6 +72,12 @@
         return this.data.map((group) => {
           return group.title.substring(0, 1)
         })
+      },
+      fixedTitle(){
+        if (this.scrollY > 0) {
+          return ''
+        }
+        return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
       }
     },
     methods: {
@@ -87,6 +102,21 @@
         this.scrollY = pos.y
       },
       _scrollTo(index){
+        // 点击到空白地方，不用滚动
+        if (!index && index !== 0) {
+          return
+        }
+
+        // 滑动超过临界值时，不能超过
+        if (index < 0) {
+          index = 0
+        } else if (index > this.listHeight.length - 2) {
+          index = this.listHeight.length - 2
+        }
+
+        // 点击更改Y值，让currentIndex更改，使右侧高亮
+        this.scrollY = -this.listHeight[index];
+
         // 第二个参数，表示是否滚动有缓动动画
         this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0);
       },
@@ -123,16 +153,25 @@
           let height2 = listHeight[i + 1]
           if (-newY >= height1 && -newY < height2) {
             this.currentIndex = i
-            this.diff = height2 + newY
+            this.diff = height2 + newY // fixed-title 效果实现
             return
           }
         }
         // 当滚动到底部，且-newY大于最后一个元素的上限
         this.currentIndex = listHeight.length - 2
+      },
+      diff(newVal){
+        let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0
+        if (this.fixedTop === fixedTop) {
+          return
+        }
+        this.fixedTop = fixedTop;
+        this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)`
       }
     },
     components: {
-      Scroll
+      Scroll,
+      Loading
     }
   }
 
