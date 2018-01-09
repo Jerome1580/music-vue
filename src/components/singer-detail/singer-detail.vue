@@ -5,8 +5,34 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import {mapGetters} from 'vuex'
+  import {getSingerDetail} from 'api/singer'
+  import {ERR_OK} from 'api/config'
 
-  export default {}
+
+  export default {
+    computed: {
+      ...mapGetters([
+        'singer'
+      ])
+    },
+    created(){
+      this._getDetail();
+    },
+    methods: {
+      _getDetail(){
+        if (!this.singer.id) {
+          // 如果没有歌手，则退回去
+          this.$router.push('/singer')
+        }
+        getSingerDetail(this.singer.id).then((res) => {
+          if (res.code === ERR_OK) {
+            console.log(res.data.list)
+          }
+        })
+      }
+    }
+  }
 </script>
 
 <style scoped lang="stylus" type="text/stylus">
