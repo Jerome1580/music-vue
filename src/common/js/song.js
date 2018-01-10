@@ -24,12 +24,12 @@ export function createSong(musicData) {
   })
 }
 
-function filterSinger(singer) {
+function filterSinger(singers) {
   let ret = []
-  if (!singer) {
+  if (!singers) {
     return ''
   }
-  singer.forEach((s) => {
+  singers.forEach((s) => {
     "use strict";
     ret.push(s.singer_name)
   })
