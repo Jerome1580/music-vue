@@ -92,18 +92,22 @@
         let blur = 0;
         this.$refs.layer.style[transform] = `translate3d(0,${translateY}px,0)`
 
-        const precent = Math.abs(newY / this.imageHeight)
+        const percent = Math.abs(newY / this.imageHeight)
+        // song-list 下拉时
         if (newY > 0) {
-          scale = 1 + precent
+          // 图片放大比例
+          scale = 1 + percent
           zIndex = 10
         } else {
-          blur = Math.min(20 * precent, 20)
+          blur = Math.min(20 * percent, 20)
         }
+        // IOS 高斯模糊
         this.$refs.filter.style[backdrop] = `blur(${blur})px`
 
-
+        // song-list 上滑时
         if (newY < this.minTranslateY) {
           zIndex = 10
+          // 背景图保留高度，（之前背景图由padding-top撑开的）
           this.$refs.bgImage.style.paddingTop = 0
           this.$refs.bgImage.style.height = `${RESERVED_HEIGH}px`
           this.$refs.playBtn.style.display = 'none'

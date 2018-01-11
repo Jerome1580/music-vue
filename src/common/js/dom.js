@@ -28,8 +28,10 @@ export function getData(el, name, val) {
   }
 }
 
+// 能力检测
 let elementStyle = document.createElement('div').style
 
+// 检测浏览器是哪种css前缀
 let vendor = (() => {
   let transformNames = {
     webkit: 'webkitTransform',
@@ -46,8 +48,9 @@ let vendor = (() => {
   }
 
   return false
-})()
+})();
 
+// 给所有css3加前缀方法
 export function prefixStyle(style) {
   if (vendor === false) {
     return false
@@ -57,5 +60,6 @@ export function prefixStyle(style) {
     return style
   }
 
+  // 前缀第一个字母大写webkitTransform
   return vendor + style.charAt(0).toUpperCase() + style.substr(1)
 }
