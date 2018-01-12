@@ -22,7 +22,7 @@
         <div class="middle">
           <div class="middle-l">
             <div class="cd-wrapper" ref="cdWrapper">
-              <div class="cd">
+              <div class="cd" :class="cdCls">
                 <img class="image" :src="currentSong.image">
               </div>
             </div>
@@ -38,7 +38,7 @@
               <i class="icon-prev"></i>
             </div>
             <div class="icon i-center">
-              <i class="icon-play"></i>
+              <i @click="togglePlaying" :class="playIcon"></i>
             </div>
             <div class="icon i-right">
               <i class="icon-next"></i>
@@ -60,12 +60,17 @@
           <h2 class="name" v-html="currentSong.name"></h2>
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
-        <div class="control"></div>
+        <div class="control">
+          <i @click.stop="togglePlaying" :class="mimiIcon"></i>
+        </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <!--QQ音乐接口有问题，暂时用本地文件-->
+    <!--<audio ref="audio" :src="currentSong.url"></audio>-->
+    <audio ref="audio" src="/static/songs/Stellar.mp3"></audio>
   </div>
 </template>
 
@@ -78,10 +83,20 @@
 
   export default {
     computed: {
+      cdCls(){
+        return this.playing ? 'play' : 'play-pause'
+      },
+      playIcon(){
+        return this.playing ? 'icon-pause' : 'icon-play'
+      },
+      mimiIcon(){
+        return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+      },
       ...mapGetters([
         'fullScreen',
         'playlist',
-        'currentSong'
+        'currentSong',
+        'playing'
       ])
     },
     methods: {
@@ -141,6 +156,9 @@
         this.$refs.cdWrapper.style[transform] = ''
 
       },
+      togglePlaying(){
+        this.setPlayState(!this.playing)
+      },
       // 计算初始位置比例
       _getPosAndScale(){
         // mini图
@@ -160,8 +178,23 @@
 
       },
       ...mapMutations({
-        setFullScreen: 'SET_FULL_SCREEN'
+        setFullScreen: 'SET_FULL_SCREEN',
+        setPlayState: 'SET_PLAYING_STATE',
       })
+    },
+    watch: {
+      currentSong(){
+        this.$nextTick(() => {
+          this.$refs.audio.play()
+        })
+
+      },
+      playing(newPlaying){
+        const audio = this.$refs.audio
+        this.$nextTick(() => {
+          newPlaying ? audio.play() : audio.pause()
+        })
+      }
     }
   }
 </script>
