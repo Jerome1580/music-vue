@@ -30,6 +30,16 @@
         </div>
         <!--下-->
         <div class="bottom">
+          <!--进度条-->
+          <div class="progress-wrapper">
+            <div class="time time-l">{{format(currentTime)}}</div>
+            <div class="progress-bar-wrapper">
+              <ProgressBar :percent="percent" @percentChange="onProgressBarChange"></ProgressBar>
+            </div>
+            <!--<div class="time time-r">{{format(currentSong.duration)}}</div>-->
+            <div class="time time-r">{{format(216)}}</div>
+          </div>
+          <!--操作区-->
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
@@ -70,7 +80,11 @@
     </transition>
     <!--QQ音乐接口有问题，暂时用本地文件-->
     <!--<audio ref="audio" :src="currentSong.url"></audio>-->
-    <audio ref="audio" src="/static/songs/Stellar.mp3" @canplay="ready" @error="error"></audio>
+    <audio ref="audio" src="/static/songs/Stellar.mp3"
+           @canplay="ready"
+           @error="error"
+           @timeupdate="updateTime"
+    ></audio>
   </div>
 </template>
 
@@ -78,6 +92,7 @@
   import {mapGetters, mapMutations} from 'vuex'
   import animations from 'create-keyframe-animation'
   import {prefixStyle} from 'common/js/dom'
+  import ProgressBar from 'base/progress-bar/progress-bar'
 
   const transform = prefixStyle('transform')
 
@@ -85,7 +100,8 @@
     data(){
       return {
         // 标记歌曲加载好了没，解决快速切换导致DOM报错
-        songReady: false
+        songReady: false,
+        currentTime: 0
       }
     },
     computed: {
@@ -100,6 +116,10 @@
       },
       disableCls(){
         return this.songReady ? '' : 'disable'
+      },
+      percent(){
+        /*return this.currentTime / this.currentSong.duration*/
+        return this.currentTime / 216
       },
       ...mapGetters([
         'fullScreen',
@@ -205,6 +225,31 @@
         // 保证上下曲按钮能点击
         this.songReady = true
       },
+      updateTime(e){
+        this.currentTime = e.target.currentTime
+      },
+      format(inteval){
+        inteval = inteval | 0 // 向下取整，相当于Math.floor
+        const minute = this._pad(inteval / 60 | 0)
+        const second = this._pad(inteval % 60)
+        return `${minute}:${second}`
+      },
+      onProgressBarChange(percent){
+        /*this.$refs.audio.currentTime = this.currentSong.duration * percent*/
+        this.$refs.audio.currentTime = 216 * percent
+        if (!this.playing) {
+          this.togglePlaying()
+        }
+      },
+      // 补0
+      _pad(num, n = 2){
+        let len = num.toString().length
+        while (len < n) {
+          num = '0' + num
+          len++
+        }
+        return num
+      },
       // 计算初始位置比例
       _getPosAndScale(){
         // mini图
@@ -242,6 +287,9 @@
           newPlaying ? audio.play() : audio.pause()
         })
       }
+    },
+    components: {
+      ProgressBar
     }
   }
 </script>
