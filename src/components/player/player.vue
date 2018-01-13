@@ -42,7 +42,7 @@
           <!--操作区-->
           <div class="operators">
             <div class="icon i-left">
-              <i class="icon-sequence"></i>
+              <i :class="iconMode" @click="changMode"></i>
             </div>
             <div class="icon i-left" :class="disableCls">
               <i @click="prev" class="icon-prev"></i>
@@ -86,6 +86,7 @@
            @canplay="ready"
            @error="error"
            @timeupdate="updateTime"
+           @ended="end"
     ></audio>
   </div>
 </template>
@@ -96,6 +97,9 @@
   import {prefixStyle} from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
   import ProgressCircle from 'base/progress-circle/progress-circle'
+  import {playMode} from 'common/js/config'
+  import {shuffle} from 'common/js/util'
+
 
   const transform = prefixStyle('transform')
 
@@ -115,6 +119,9 @@
       playIcon(){
         return this.playing ? 'icon-pause' : 'icon-play'
       },
+      iconMode(){
+        return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
+      },
       mimiIcon(){
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
       },
@@ -130,7 +137,9 @@
         'playlist',
         'currentSong',
         'playing',
-        'currentIndex'
+        'currentIndex',
+        'mode',
+        'sequenceList'
       ])
     },
     methods: {
@@ -208,6 +217,10 @@
         }
         this.songReady = true
       },
+      loop(){
+        this.$refs.audio.currentTime = 0
+        this.$refs.audio.play()
+      },
       next(){
         if (!this.songReady) {
           return
@@ -245,6 +258,34 @@
           this.togglePlaying()
         }
       },
+      changMode(){
+        const mode = (this.mode + 1) % 3
+        this.setPlayMode(mode)
+        let list = null
+        if (mode === playMode.random) {
+          list = shuffle(this.sequenceList)
+        } else {
+          list = this.sequenceList
+        }
+        this.resetCurrentIndex(list)
+        this.setPlayList(list)
+      },
+      resetCurrentIndex(list){
+        // 找到当前播放歌曲的id
+        let index = list.findIndex((item) => {
+          return item.id === this.currentSong.id
+        })
+        // 把当前歌曲的id置位新歌曲列表的id，使currentSong不会变，切歌时歌曲扔为原歌曲播放不会断
+        this.setCurrentIndex(index)
+      },
+      end(){
+        console.log()
+        if (this.mode === playMode.loop) {
+          this.loop()
+        } else {
+          this.next()
+        }
+      },
       // 补0
       _pad(num, n = 2){
         let len = num.toString().length
@@ -275,11 +316,17 @@
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
         setPlayState: 'SET_PLAYING_STATE',
-        setCurrentIndex: 'SET_CURRENT_INDEX'
+        setCurrentIndex: 'SET_CURRENT_INDEX',
+        setPlayMode: 'SET_PLAY_MODE',
+        setPlayList: 'SET_PLAYLIST'
       })
     },
     watch: {
-      currentSong(){
+      currentSong(newSong, oldSong){
+        // 切换播放模式时，因为playList变了，currentSong变了，但id没变
+        if (newSong.id === oldSong.id) {
+          return
+        }
         this.$nextTick(() => {
           this.$refs.audio.play()
         })
