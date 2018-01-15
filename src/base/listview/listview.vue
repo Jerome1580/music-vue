@@ -100,6 +100,9 @@
 
         this._scrollTo(anchorIndex)
       },
+      refresh(){
+        this.$refs.listview.refresh()
+      },
       // 获取实时滚动的Y
       scroll(pos){
         this.scrollY = pos.y
