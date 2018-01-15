@@ -15,13 +15,20 @@ export default class Song {
   }
 
   getLyric() {
-    getLyric('0035cAWK49CSs1').then((res) => {
-      if (res.code === ERR_OK) {
-        this.lyric = Base64.decode(res.lyric)
-        console.log(this.lyric)
-      }
+    if (this.lyric) {
+      // 如果有歌词了（因为每次切换song变化时就请求new Song实例，都会getLyric，浪费）
+      return Promise.resolve((this.lyric))
+    }
+    return new Promise((resolve, reject) => {
+      getLyric('001ZCrrt02TNPv').then((res) => {
+        if (res.code === ERR_OK) {
+          this.lyric = Base64.decode(res.lyric)
+          resolve(this.lyric)
+        } else {
+          reject('no lyric')
+        }
+      })
     })
-
   }
 }
 

@@ -99,6 +99,7 @@
   import ProgressCircle from 'base/progress-circle/progress-circle'
   import {playMode} from 'common/js/config'
   import {shuffle} from 'common/js/util'
+  import Lyric from 'lyric-parser'
 
 
   const transform = prefixStyle('transform')
@@ -109,7 +110,8 @@
         // 标记歌曲加载好了没，解决快速切换导致DOM报错
         songReady: false,
         currentTime: 0,
-        radius: 32
+        radius: 32,
+        currentLyric: null
       }
     },
     computed: {
@@ -286,6 +288,12 @@
           this.next()
         }
       },
+      getLyric(){
+        this.currentSong.getLyric().then((lyric) => {
+          this.currentLyric = new Lyric(lyric)
+          console.log(this.currentLyric)
+        })
+      },
       // 补0
       _pad(num, n = 2){
         let len = num.toString().length
@@ -329,7 +337,7 @@
         }
         this.$nextTick(() => {
           this.$refs.audio.play()
-          this.currentSong.getLyric()
+          this.getLyric()
         })
 
       },
