@@ -25,11 +25,14 @@
              @touchend="middleTouchEnd"
         >
           <!--cd界面-->
-          <div class="middle-l">
+          <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd" :class="cdCls">
                 <img class="image" :src="currentSong.image">
               </div>
+            </div>
+            <div class="playing-lyric-wrapper">
+              <div class="playing-lyric">{{playingLyric}}</div>
             </div>
           </div>
           <!--歌词部分-->
@@ -125,6 +128,7 @@
 
 
   const transform = prefixStyle('transform')
+  const transitionDuration = prefixStyle('transitionDuration')
 
   export default {
     data(){
@@ -135,7 +139,8 @@
         radius: 32,
         currentLyric: null,
         currentLineNum: 0,
-        currentShow: 'cd'
+        currentShow: 'cd',
+        playingLyric: ''
       }
     },
     computed: {
@@ -229,7 +234,13 @@
 
       },
       togglePlaying(){
+        if (!this.songReady) {
+          return
+        }
         this.setPlayState(!this.playing)
+        if (this.currentLyric) {
+          this.currentLyric.togglePlay()
+        }
       },
       prev(){
         // 歌曲没好，不能点击
@@ -249,6 +260,10 @@
       loop(){
         this.$refs.audio.currentTime = 0
         this.$refs.audio.play()
+        if (this.currentLyric) {
+          // 如果循环播放，歌词到第一个
+          this.currentLyric.seek(0)
+        }
       },
       next(){
         if (!this.songReady) {
@@ -281,10 +296,14 @@
         return `${minute}:${second}`
       },
       onProgressBarChange(percent){
-        /*this.$refs.audio.currentTime = this.currentSong.duration * percent*/
+        /* const currentTime = this.currentSong.duration * percent*/
+        /*this.$refs.audio.currentTime = currentTime*/
         this.$refs.audio.currentTime = 216 * percent
         if (!this.playing) {
           this.togglePlaying()
+        }
+        if (this.currentLyric) {
+          this.currentLyric.seek(216 * percent * 1000)
         }
       },
       changMode(){
@@ -320,6 +339,10 @@
           if (this.playing) {
             this.currentLyric.play()
           }
+        }).catch(() => {
+          this.currentLyric = null
+          this.playingLyric = ''
+          this.currentLineNum = 0
         })
       },
       haddleLyric({lineNum, txt}){
@@ -331,6 +354,7 @@
         } else {
           this.$refs.lyricList.scrollTo(0, 0, 1000)
         }
+        this.playingLyric = txt
       },
       middleTouchStart(e){
         this.touch.initiated = true
@@ -350,10 +374,42 @@
           return
         }
         const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
-        const width = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
-        this.$refs.lyricList.$el.style[transform] = `translat3d(${width}px,0,0)`
+        const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
+        this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
+        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+        this.$refs.lyricList.$el.style[transitionDuration] = 0
+        this.$refs.middleL.style.opacity = 1 - this.touch.percent
+        this.$refs.middleL.style[transitionDuration] = 0
+
       },
       middleTouchEnd(){
+        let offsetWidth
+        let opacity
+        if (this.currentShow === 'cd') {
+          // 从右向左滑
+          if (this.touch.percent > 0.1) {
+            offsetWidth = -window.innerWidth
+            opacity = 0
+            this.currentShow = 'lyric'
+          } else {
+            offsetWidth = 0
+            opacity = 1
+          }
+        } else {
+          if (this.touch.percent < 0.9) {
+            offsetWidth = 0
+            this.currentShow = 'cd'
+            opacity = 1
+          } else {
+            offsetWidth = -window.innerWidth
+            opacity = 0
+          }
+        }
+        const time = 300
+        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+        this.$refs.middleL.style.opacity = opacity
+        this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
+
       },
       // 补0
       _pad(num, n = 2){
@@ -395,6 +451,10 @@
         // 切换播放模式时，因为playList变了，currentSong变了，但id没变
         if (newSong.id === oldSong.id) {
           return
+        }
+        // 如果切换歌的时候，歌词是起了一个定时器，所以切换歌时要停止，防止影响下一个歌曲
+        if (this.currentLyric) {
+          this.currentLyric.stop()
         }
         this.$nextTick(() => {
           this.$refs.audio.play()
