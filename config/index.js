@@ -3,6 +3,7 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 
 const path = require('path')
+const proxyConfig = require('./proxyConfig')
 
 module.exports = {
   dev: {
@@ -10,19 +11,7 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {
-      '/api/getDiscList': {
-        target: 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg',
-        changeOrigin: true,
-        onProxyReq(proxyReq, req, res){
-          proxyReq.setHeader('Referer', 'https://c.y.qq.com')
-          proxyReq.setHeader('Host', 'c.y.qq.com')
-        },
-        pathRewrite: {
-          '^/api/getDiscList': ''
-        }
-      }
-    },
+    proxyTable: proxyConfig.proxyList,
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
