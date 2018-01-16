@@ -15,7 +15,7 @@
         <div class="recommend-list">
           <h1 class="list-title">热门歌单推荐</h1>
           <ul>
-            <li v-for="item in discList" class="item">
+            <li @click="selectItem(item)" v-for="item in discList" class="item">
               <div class="icon">
                 <img width="60" height="60" v-lazy="item.imgurl">
               </div>
@@ -31,6 +31,7 @@
         <Loading></Loading>
       </div>
     </Scroll>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -38,8 +39,9 @@
   import Loading from 'base/loading/loading'
   import Scroll from 'base/scroll/scroll'
   import Slider from 'base/slider/slider'
-  import {getRecommend} from 'api/recommend'
+  import {getRecommend, getDiscList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
+  import {mapMutations} from 'vuex'
   import {playlistMixin} from 'common/js/mixin'
 
   export default {
@@ -60,6 +62,12 @@
         this.$refs.recommend.style.bottom = bottom
         this.$refs.scroll.refresh()
       },
+      selectItem(item){
+        this.$router.push({
+          path: `/recommend/${item.dissid}`
+        })
+        this.setDisc(item)
+      },
       _getRecommend(){
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {
@@ -69,9 +77,10 @@
         })
       },
       _getDiscList(){
-        // 暂时用mock数据
-        this.$axios.get('static/mock/DiscList.json').then((res) => {
-          this.discList = res.data;
+        getDiscList().then((res) => {
+          if (res.code === ERR_OK) {
+            this.discList = res.data.list
+          }
         })
       },
       loadImage(){
@@ -79,7 +88,10 @@
           this.$refs.scroll.refresh();
           this.checkLoaded = true;
         }
-      }
+      },
+      ...mapMutations({
+        setDisc: 'SET_DISE'
+      })
     },
     components: {
       Slider,
