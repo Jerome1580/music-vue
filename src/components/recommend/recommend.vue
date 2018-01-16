@@ -38,7 +38,7 @@
   import Loading from 'base/loading/loading'
   import Scroll from 'base/scroll/scroll'
   import Slider from 'base/slider/slider'
-  import {getRecommend} from 'api/recommend'
+  import {getRecommend, getDiscList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
 
   export default {
@@ -62,9 +62,10 @@
         })
       },
       _getDiscList(){
-        // 暂时用mock数据
-        this.$axios.get('static/mock/DiscList.json').then((res) => {
-          this.discList = res.data;
+        getDiscList().then((res) => {
+          if (res.code === ERR_OK) {
+            this.discList = res.data.list
+          }
         })
       },
       loadImage(){
