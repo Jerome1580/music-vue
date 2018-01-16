@@ -1,6 +1,6 @@
 <template>
   <transition name="slide">
-    <music-list :title="title" :bg-image="bgImage"></music-list>
+    <music-list :title="title" :bg-image="bgImage" :songs="songs"></music-list>
   </transition>
 </template>
 
@@ -9,8 +9,14 @@
   import {mapGetters} from 'vuex'
   import {getSongList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
+  import {createRecommendSong} from 'common/js/song'
 
   export default {
+    data(){
+      return {
+        songs: []
+      }
+    },
     computed: {
       title(){
         return this.disc.dissname
@@ -27,7 +33,12 @@
     },
     methods: {
       _getSongList(){
+        if (!this.disc.dissid) {
+          this.$router.back()
+          return
+        }
         getSongList(this.disc.dissid).then((res) => {
+          // 返回的是jsonp的字符串
           if (typeof res === 'string') {
             var reg = /^\w+\(({.+})\)$/
             var matches = res.match(reg)
@@ -36,9 +47,18 @@
             }
           }
           if (res.code === ERR_OK) {
-            console.log(res.cdlist[0].songlist)
+            this.songs = this._nomalizeSongs(res.cdlist[0].songlist)
           }
         })
+      },
+      _nomalizeSongs(list){
+        let ret = []
+        list.forEach((musicData) => {
+          if (musicData.songid && musicData.albumid) {
+            ret.push(createRecommendSong(musicData))
+          }
+        })
+        return ret
       }
     },
     components: {

@@ -74,7 +74,6 @@
       this.imageHeight = this.$refs.bgImage.clientHeight;
       this.minTranslateY = -this.imageHeight + RESERVED_HEIGH;
       this.$refs.list.$el.style.top = `${this.imageHeight}px`
-      console.log(this)
     },
     created(){
       this.probeType = 3
