@@ -45,11 +45,24 @@ export function createSong(musicData) {
   })
 }
 
+function filterSinger(singers) {
+  let ret = []
+  if (!singers) {
+    return ''
+  }
+  singers.forEach((s) => {
+    "use strict";
+    ret.push(s.singer_name)
+  })
+  return ret.join('/')
+}
+
+
 export function createRecommendSong(musicData) {
   return new Song({
     id: musicData.songid,
     mid: musicData.albummid,
-    singer: filterSinger(musicData.singer),
+    singer: filterRecommendSinger(musicData.singer),
     name: musicData.songname,
     album: musicData.albumname,
     duration: musicData.interval,
@@ -58,14 +71,15 @@ export function createRecommendSong(musicData) {
   })
 }
 
-export function filterSinger(singers) {
+
+function filterRecommendSinger(singers) {
   let ret = []
   if (!singers) {
     return ''
   }
   singers.forEach((s) => {
     "use strict";
-    ret.push(s.singer_name)
+    ret.push(s.name)
   })
   return ret.join('/')
 }
