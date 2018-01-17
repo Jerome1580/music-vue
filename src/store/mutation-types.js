@@ -13,3 +13,5 @@ export const SET_PLAY_MODE = 'SET_PLAY_MODE'
 export const SET_CURRENT_INDEX = 'SET_CURRENT_INDEX'
 
 export const SET_DISE = 'SET_DISE'
+
+export const SET_TOPLIST = 'SET_TOPLIST'
