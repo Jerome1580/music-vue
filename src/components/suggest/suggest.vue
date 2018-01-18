@@ -89,7 +89,7 @@
       },
       _genResult(data){
         let ret = []
-        if (data.zhida && data.zhida.singerid) {
+        if (data.zhida && data.zhida.singername) {
           ret.push({...data.zhida, ...{type: TYPE_SINGER}})
         }
         if (data.song) {
@@ -108,10 +108,7 @@
       },
       _checkMore(data){
         const song = data.song
-        if (!song.list.length || (song.curnum + song.curpage * perpage) >=
-
-
-          song.totalnum) {
+        if (!song.list.length || (song.curnum + song.curpage * perpage) >= song.totalnum) {
           this.hasMore = false
         }
       }
