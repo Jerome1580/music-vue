@@ -99,11 +99,12 @@
             <i @click.stop="togglePlaying" class="icon-mini" :class="mimiIcon"></i>
           </ProgressCircle>
         </div>
-        <div class="control">
+        <div class="control" @click.stop="showPlaylist">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <Playlist ref="playlist"></Playlist>
     <!--QQ音乐接口有问题，暂时用本地文件-->
     <!--<audio ref="audio" :src="currentSong.url"></audio>-->
     <audio ref="audio" src="/static/songs/Stellar.mp3"
@@ -125,6 +126,7 @@
   import {shuffle} from 'common/js/util'
   import Lyric from 'lyric-parser'
   import Scroll from 'base/scroll/scroll'
+  import Playlist from 'components/playlist/playlist'
 
 
   const transform = prefixStyle('transform')
@@ -366,6 +368,9 @@
         }
         this.playingLyric = txt
       },
+      showPlaylist(){
+        this.$refs.playlist.show()
+      },
       middleTouchStart(e){
         this.touch.initiated = true
         const touch = e.touches[0]
@@ -458,6 +463,9 @@
     },
     watch: {
       currentSong(newSong, oldSong){
+        if (!newSong.id) {
+          return
+        }
         // 切换播放模式时，因为playList变了，currentSong变了，但id没变
         if (newSong.id === oldSong.id) {
           return
@@ -482,7 +490,8 @@
     components: {
       ProgressBar,
       ProgressCircle,
-      Scroll
+      Scroll,
+      Playlist
     }
   }
 </script>
