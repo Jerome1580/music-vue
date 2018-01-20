@@ -111,6 +111,7 @@
           // 如果点击的是歌曲
           this.insertSong(item)
         }
+        this.$emit('select')
 
       },
       listScroll(){
