@@ -123,16 +123,17 @@
   import ProgressBar from 'base/progress-bar/progress-bar'
   import ProgressCircle from 'base/progress-circle/progress-circle'
   import {playMode} from 'common/js/config'
-  import {shuffle} from 'common/js/util'
   import Lyric from 'lyric-parser'
   import Scroll from 'base/scroll/scroll'
   import Playlist from 'components/playlist/playlist'
+  import {playerMixin} from 'common/js/mixin'
 
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
 
   export default {
+    mixins: [playerMixin],
     data(){
       return {
         // 标记歌曲加载好了没，解决快速切换导致DOM报错
@@ -152,9 +153,6 @@
       playIcon(){
         return this.playing ? 'icon-pause' : 'icon-play'
       },
-      iconMode(){
-        return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
-      },
       mimiIcon(){
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
       },
@@ -167,12 +165,8 @@
       },
       ...mapGetters([
         'fullScreen',
-        'playlist',
-        'currentSong',
         'playing',
-        'currentIndex',
-        'mode',
-        'sequenceList'
+        'currentIndex'
       ])
     },
     created(){
@@ -318,26 +312,6 @@
           this.currentLyric.seek(216 * percent * 1000)
         }
       },
-      changMode(){
-        const mode = (this.mode + 1) % 3
-        this.setPlayMode(mode)
-        let list = null
-        if (mode === playMode.random) {
-          list = shuffle(this.sequenceList)
-        } else {
-          list = this.sequenceList
-        }
-        this.resetCurrentIndex(list)
-        this.setPlayList(list)
-      },
-      resetCurrentIndex(list){
-        // 找到当前播放歌曲的id
-        let index = list.findIndex((item) => {
-          return item.id === this.currentSong.id
-        })
-        // 把当前歌曲的id置位新歌曲列表的id，使currentSong不会变，切歌时歌曲扔为原歌曲播放不会断
-        this.setCurrentIndex(index)
-      },
       end(){
         if (this.mode === playMode.loop) {
           this.loop()
@@ -455,15 +429,12 @@
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
-        setPlayState: 'SET_PLAYING_STATE',
-        setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayMode: 'SET_PLAY_MODE',
-        setPlayList: 'SET_PLAYLIST'
       })
     },
     watch: {
       currentSong(newSong, oldSong){
         if (!newSong.id) {
+          // 只有一首歌时，删除的话，就不往下走了
           return
         }
         // 切换播放模式时，因为playList变了，currentSong变了，但id没变
