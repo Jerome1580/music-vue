@@ -108,7 +108,7 @@
     <!--QQ音乐接口有问题，暂时用本地文件-->
     <!--<audio ref="audio" :src="currentSong.url"></audio>-->
     <audio ref="audio" src="/static/songs/Stellar.mp3"
-           @canplay="ready"
+           @play="ready"
            @error="error"
            @timeupdate="updateTime"
            @ended="end"
@@ -117,7 +117,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapGetters, mapMutations} from 'vuex'
+  import {mapGetters, mapMutations, mapActions} from 'vuex'
   import animations from 'create-keyframe-animation'
   import {prefixStyle} from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
@@ -287,6 +287,7 @@
       },
       ready(){
         this.songReady = true
+        this.savePlayHistory(this.currentSong)
       },
       error(){
         // 保证上下曲按钮能点击
@@ -428,8 +429,11 @@
 
       },
       ...mapMutations({
-        setFullScreen: 'SET_FULL_SCREEN',
-      })
+        setFullScreen: 'SET_FULL_SCREEN'
+      }),
+      ...mapActions([
+        'savePlayHistory'
+      ])
     },
     watch: {
       currentSong(newSong, oldSong){
@@ -449,7 +453,6 @@
           this.$refs.audio.play()
           this.getLyric()
         }, 1000)
-
       },
       playing(newPlaying){
         const audio = this.$refs.audio
