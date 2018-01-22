@@ -19,7 +19,7 @@
         ></Switches>
         <div class="list-wrapper">
           <!--最近播放-->
-          <Scroll ref="songList" class="list-scroll" v-if="currentIndex === 0" :refreshDelay="refreshDelay"
+          <Scroll ref="songList" class="list-scroll" v-if="currentIndex === 0"
                   :data="playHistory">
             <div class="list-inner">
               <SongList :songs="playHistory" @select="selectSong"></SongList>
@@ -27,6 +27,7 @@
           </Scroll>
           <!--搜索历史-->
           <Scroll ref="searchList"
+                  :refreshDelay="refreshDelay"
                   class="list-scroll"
                   v-if="currentIndex === 1"
                   :data="searchHistory"
