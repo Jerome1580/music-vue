@@ -117,16 +117,17 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { mapGetters, mapMutations, mapActions } from 'vuex'
+  import {mapGetters, mapMutations, mapActions} from 'vuex'
   import animations from 'create-keyframe-animation'
-  import { prefixStyle } from 'common/js/dom'
+  import {prefixStyle} from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
   import ProgressCircle from 'base/progress-circle/progress-circle'
-  import { playMode } from 'common/js/config'
+  import {playMode} from 'common/js/config'
   import Lyric from 'lyric-parser'
   import Scroll from 'base/scroll/scroll'
   import Playlist from 'components/playlist/playlist'
-  import { playerMixin } from 'common/js/mixin'
+  import {playerMixin} from 'common/js/mixin'
+
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
@@ -244,7 +245,6 @@
         }
         if (this.playlist.length === 1) {
           this.loop()
-          return
         } else {
           let index = this.currentIndex - 1
           if (index === -1) {
@@ -272,7 +272,6 @@
         }
         if (this.playlist.length === 1) {
           this.loop()
-          return
         } else {
           let index = this.currentIndex + 1
           if (index === this.playlist.length) {
@@ -323,9 +322,6 @@
       },
       getLyric(){
         this.currentSong.getLyric().then((lyric) => {
-          if (this.currentSong.lyric !== lyric) {
-            return
-          }
           this.currentLyric = new Lyric(lyric, this.haddleLyric)
           if (this.playing) {
             this.currentLyric.play()
@@ -455,7 +451,6 @@
         }
         clearTimeout(this.timer)
         this.timer = setTimeout(() => {
-          // 歌曲在手机上播放，切换到后台后，再切回到前台可以在播放
           this.$refs.audio.play()
           this.getLyric()
         }, 1000)
