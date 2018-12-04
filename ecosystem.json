@@ -19,6 +19,7 @@
             "repo":"git@github.com:Jerome1580/music-vue.git",
             "path":"/home/rj_manager/www/music/production",
             "ssh_options":"StrictHostKeyChecking=no",
+            "post-deploy":"npm i && npm run build && export NODE_ENV=production && pm2 startOrRestart ecosystem.json --env production",
             "env":{
                 "NODE_ENV":"production"
             }
