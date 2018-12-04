@@ -1,8 +1,8 @@
 {
     "apps":[
         {
-            "name":"manager-antd",
-            "script":"app.js",
+            "name":"music-vue",
+            "script":"prod.server.js",
             "env":{
                 "COMMON_VARIABLE":"true"
             },
